@@ -7,11 +7,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Runtime.Serialization.Json;
+using System.Text.RegularExpressions;
 
 namespace JsonCleaningWithoutNewtonsoft
 {
     class Program
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
             WebRequest request = WebRequest.Create("https://coderbyte.com/api/challenges/json/json-cleaning");
@@ -20,11 +25,27 @@ namespace JsonCleaningWithoutNewtonsoft
             using (var reader = new StreamReader(response.GetResponseStream()))
             {
                 string result = reader.ReadToEnd(); // do something fun...  
-                J
+
+                var s = FilterJsonResponse(result);
+                Console.WriteLine(s);
                 Console.WriteLine(result);
                
             }
             Console.WriteLine(response);
+        }
+
+        private static string FilterJsonResponse(string jsonString)
+        {
+            string originalEmptyValues = "(\"\"|\"[-]\"|\"N\\/A\")";
+            string emptyPlaceholder = "#empty#";
+            string emptyKeyValues = "(\"[a-zA-Z]+\":#empty#,|,\"[a-zA-Z]+\":#empty#)";
+            string emptyArrayValues = "(#empty#,|,#empty#)";
+            string result = Regex.Replace(jsonString, originalEmptyValues, emptyPlaceholder);
+            result = Regex.Replace(result, emptyKeyValues, "");
+            result = Regex.Replace(result, emptyArrayValues, "");
+
+            return result;
+
         }
     }
 
